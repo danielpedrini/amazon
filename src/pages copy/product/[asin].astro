@@ -1,0 +1,60 @@
+---
+// Importações necessárias
+
+import PriceHistoryChart from "../../components/PriceHistoryChart"; // Componente para o gráfico
+import Layout from "../../layouts/Layout.astro";
+import { supabase } from "../../lib/supabase"; // Configuração do Supabase
+
+// Captura o `asin` da URL
+const { asin } = Astro.params;
+
+// Busca todas as linhas do produto na base de dados usando o `asin`
+const { data: productDetails, error } = await supabase
+    .from('amazon_products')
+    .select('*')
+    .eq('asin', asin);
+
+if (error) {
+    throw new Error(`Failed to fetch product details: ${error.message}`);
+}
+
+// Garante que os dados do produto estão disponíveis
+if (!productDetails || productDetails.length === 0) {
+    throw new Error(`No product found with asin: ${asin}`);
+}
+
+// Dados para exibição principal e gráfico
+const mainProduct = productDetails[productDetails.length-1]; // Pega o primeiro registro como base de detalhes
+const mainProductFirstDay = productDetails[0]
+const difference = (1 - mainProduct.price - mainProductFirstDay.price) / mainProductFirstDay.price *100
+
+
+
+const priceHistory = productDetails.map((entry) => ({
+    date: entry.date,
+    price: entry.price
+}));
+---
+
+<Layout title={`Detalhes do Produto - ${mainProduct.title}`}>
+    <main class="max-w-7xl mx-auto p-4">
+        <!-- Informação do Produto -->
+        <a href={mainProduct.url} target="_blank"><section class="flex flex-col items-center md:flex-row gap-6">
+            <img src={mainProduct.url_image} alt={mainProduct.title} class="w-1/8 h-auto rounded-lg shadow-md" />
+            <div class="w-2/3">
+                <h1 class="text-2xl font-bold mb-2">{mainProduct.title}</h1>
+                <p class="text-gray-600">{mainProduct.category}</p>
+                <p class="text-lg font-bold text-teal-600 mb-2">R$ {mainProduct.price.toFixed(2)}</p>
+                <p class="text-md text-gray-500">Rating: {mainProduct.rating}</p>
+                <p class="text-md text-gray-500">Informações de envio: {mainProduct.shipping_information || "N/A"}</p>
+                <p class="text-md text-gray-500">Volume de vendas: {mainProduct.sales_volume || "N/A"}</p>
+            </div>
+        </section></a>
+
+        <!-- Gráfico de Histórico de Preços -->
+        <section class="mt-8">
+            <h2 class="text-xl font-bold mb-4">Histórico de Preços</h2>
+            <PriceHistoryChart data={priceHistory} client:load/>
+        </section>
+    </main>
+</Layout>

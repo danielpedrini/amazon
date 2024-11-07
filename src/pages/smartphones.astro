@@ -1,0 +1,25 @@
+---
+export const prerender = false;
+import Layout from "../layouts/Layout.astro";
+import H1 from "../components/H1.astro";
+import type { ProductOpportunity } from "../interfaces/ProductOpportunity";
+import PromotionCard from "../components/PromotionCard.astro";
+
+const urlsmartphone = `${Astro.url.origin}/api/opportunity/smartphone/20.json`;
+const resSmartphone = await fetch(urlsmartphone);
+if (!resSmartphone.ok) {
+    throw new Error("Failed to fetch smartphone opportunities");
+}
+
+const dataSmartphone: ProductOpportunity[] = await resSmartphone.json();
+---
+
+<Layout title="Welcome to Astro.">
+    <H1 text="Smartphones" />
+
+    <main class="max-sm:px-5 px-24  mx-auto w-full flex flex-wrap gap-4">
+        {dataSmartphone.map((product) => (
+            <PromotionCard {...product} />
+        ))}
+    </main>
+</Layout>

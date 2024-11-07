@@ -1,0 +1,76 @@
+---
+import type { ProductOpportunity } from "../interfaces/ProductOpportunity";
+export const prerender = false
+
+interface Props extends ProductOpportunity {}
+
+
+function getStars(rating: number) {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+    return {
+        fullStars,
+        halfStar,
+        emptyStars
+    };
+}
+
+const {
+    asin,
+	url_image,
+    url,
+	title,
+	category,
+	actual_price,
+    difference,
+	rating,
+	shipping_information,
+	sales_volume,
+} = await Astro.props;
+
+console.log()
+
+const { fullStars, halfStar, emptyStars } = getStars(rating);
+
+const urlsmartphone = `${Astro.url.origin}/product/${asin}`;
+
+---
+
+<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden w-full md:w-1/5 p-4 flex-shrink-0">
+    <a href={urlsmartphone} ><img src={url_image} alt={title} class="w-[400px] h-[300px] object-cover" /></a>
+    <div class="p-4">
+        <h3 class="text-lg font-semibold mb-2 line-clamp-2">{title}</h3>
+        <span class="inline-block bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full mb-2">{category}</span>
+        <p class="text-teal-900 font-bold text-md mb-2">R$ {actual_price.toFixed(2).toLocaleString()}</p>
+        <p class="text-teal-900 font-bold text-md mb-2">{difference.toFixed(2).toLocaleString()}% Abaixo do valor inicial</p>
+        <div class="flex items-center mb-2">
+            {Array.from({ length: fullStars }).map(() => <span class="star"></span>)}
+            {halfStar && <span class="star half-star"></span>}
+            {Array.from({ length: emptyStars }).map(() => <span class="star empty-star"></span>)}
+        </div>
+        {shipping_information && (
+            <p class="text-sm text-tail-900 mt-2">Entrega: {shipping_information}</p>
+        )}
+        {sales_volume && <p class="text-sm text-gray-600 mt-2">Sales: {sales_volume}</p>}
+    </div>
+</div>
+<style>
+    .star {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        background-color: gold;
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        margin-right: 0.1rem;
+    }
+
+    .half-star {
+        background: linear-gradient(90deg, gold 50%, #ddd 50%);
+    }
+
+    .empty-star {
+        background-color: #ddd;
+    }
+</style>

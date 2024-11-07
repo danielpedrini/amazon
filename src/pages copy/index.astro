@@ -1,0 +1,46 @@
+---
+export const prerender = false;
+import Layout from "../layouts/Layout.astro";
+import H1 from "../components/H1.astro";
+import type { ProductOpportunity } from "../interfaces/ProductOpportunity";
+import PromotionCard from "../components/PromotionCard.astro";
+const urlsmartphone = `${Astro.url}api/opportunity/smartphone/1.json`;
+const urlTv = `${Astro.url}api/opportunity/televisão/1.json`;
+const urlEletrodomesticos = `${Astro.url}api/opportunity/eletrodomesticos/1.json`;
+const resSmartphone = await fetch(urlsmartphone);
+const resTv = await fetch(urlTv);
+const resEletrodomesticos = await fetch(urlEletrodomesticos);
+if (!resSmartphone.ok) {
+	throw new Error("Failed to fetch smartphone opportunities");
+}
+if (!resTv.ok) {
+	throw new Error("Failed to fetch smartphone opportunities");
+}
+if (!resEletrodomesticos.ok) {
+	throw new Error("Failed to fetch smartphone opportunities");
+}
+const dataSmartphone: ProductOpportunity[] = await resSmartphone.json();
+const dataTv: ProductOpportunity[] = await resTv.json();
+const dataEletrodomesticos: ProductOpportunity[] =
+	await resEletrodomesticos.json();
+const productSmartphone = dataSmartphone[0];
+const produtoTV = dataTv[0];
+const produtoEletrodomesticos = dataEletrodomesticos[0];
+---
+
+<Layout title="Welcome to Astro.">
+	<H1 text="Produtos Amazon" />
+
+	<main class="max-sm:px-5 max-w-7xl mx-auto w-full flex flex-row gap-4">
+
+			<PromotionCard {...productSmartphone} />
+
+
+			<PromotionCard {...produtoTV} />
+
+
+			<PromotionCard {...produtoEletrodomesticos} />
+
+	</main>
+</Layout
+>
